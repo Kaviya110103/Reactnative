@@ -9,6 +9,7 @@ export default function HomeScreen() {
       <Text style={styles.title}>Home Screen</Text>
       <Button title="Go to Login" onPress={() => router.push('/login')} />
         <Button title="Go to Register" onPress={() => router.push('/register')} />
+            
       {/* <Button title="Go to Addemployee" onPress={() => router.push('/addemployee')} /> */}
     </View>
   );
