@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "MyReactNativeApp",
+			"path": ".."
+		},
+		{
+			"name": "lib",
+			"path": "../../../design/employee-login-magic/src/lib"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "MyReactNativeApp"
+	}
+}
