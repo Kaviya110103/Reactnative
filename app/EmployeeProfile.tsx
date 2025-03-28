@@ -77,7 +77,7 @@ const EmployeeProfile = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.1.13:8080/api/emp/${employeeId}`);
+        const response = await fetch(`http://192.168.1.8:8080/api/emp/${employeeId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch employee details');
         }
@@ -253,7 +253,7 @@ const EmployeeProfile = () => {
           {/* Profile Image Section */}
           <View style={styles.profileImageSection}>
             <Image 
-              source={{ uri: employee.profileImage ?? `http://192.168.1.13:8080/${employee.profileImage}`}}
+              source={{ uri: employee.profileImage ?? `http://192.168.1.8:8080/${employee.profileImage}`}}
               style={styles.profileImage}
             />
             <View style={styles.nameContainer}>
