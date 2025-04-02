@@ -31,7 +31,7 @@ const LeavePermissionEmployee = ({ employeeId }) => {
   const getLastRequest = async () => {
     try {
       const response = await fetch(
-        `http://192.168.1.13:8080/api/leave-permissions/employee/${employeeId}`
+        `http://192.168.1.24:8080/api/leave-permissions/employee/${employeeId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch last request");
@@ -60,7 +60,7 @@ const LeavePermissionEmployee = ({ employeeId }) => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.13:8080/api/leave-permissions/${employeeId}`,
+        `http://192.168.1.24:8080/api/leave-permissions/${employeeId}`,
         {
           method: "POST",
           headers: {

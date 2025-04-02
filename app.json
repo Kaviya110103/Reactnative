@@ -9,13 +9,18 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow access to the camera to capture photos.",
+        "NSMicrophoneUsageDescription": "Allow access to the microphone for audio recording."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["CAMERA", "RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",

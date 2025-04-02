@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import axios from 'axios';
 import {
   View,
   Text,
@@ -10,31 +10,10 @@ import {
 } from "react-native";
 import TimeOut from "./TimeOut";
 
-const TimeIn = ({ employeeId }) => {
+const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
   const [selectedStatus, setSelectedStatus] = useState("Present");
   const [loading, setLoading] = useState(false);
   const [absentLoading, setAbsentLoading] = useState(false);
-  const [latestAttendanceId, setLatestAttendanceId] = useState(null);
-
-  // Function to fetch the latest attendance ID
-  const fetchAttendanceData = async () => {
-    try {
-      const response = await axios.get(
-        `http://192.168.1.13:8080/api/attendance/employee/${employeeId}`
-      );
-      if (response.data?.length) {
-        const lastAttendance = response.data[response.data.length - 1];
-        setLatestAttendanceId(lastAttendance.id);
-      }
-    } catch (error) {
-      console.error("Error fetching attendance data:", error);
-    }
-  };
-
-  // Fetch latest attendance ID when the component mounts
-  useEffect(() => {
-    fetchAttendanceData();
-  }, []);
 
   const handleTimeIn = async () => {
     if (!selectedStatus) {
@@ -51,7 +30,7 @@ const TimeIn = ({ employeeId }) => {
       };
 
       const response = await fetch(
-        "http://192.168.1.13:8080/api/attendance/time-in",
+        "http://192.168.1.24:8080/api/attendance/time-in",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -64,14 +43,48 @@ const TimeIn = ({ employeeId }) => {
         throw new Error(errorData.message || "Failed to record Time In.");
       }
 
-      Alert.alert("Success", "Time In recorded successfully.");
+      const responseData = await response.json(); // ✅ Get latestAttendanceId from backend
 
-      // Fetch latest attendance ID after marking Time In
-      fetchAttendanceData();
+      if (fetchAttendanceData) {
+        fetchAttendanceData(); // ✅ Refresh parent component
+      } else {
+        console.error("fetchAttendanceData is undefined!");
+      }
+
+      Alert.alert("Success", "Time In recorded successfully.");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMarkAbsent = async () => {
+    setAbsentLoading(true);
+    try {
+      const response = await fetch(
+        `http://192.168.1.24:8080/api/attendance/mark-absent?employeeId=${employeeId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to mark Absent.");
+      }
+
+      Alert.alert("Success", "Attendance marked as Absent successfully!");
+
+      if (fetchAttendanceData) {
+        fetchAttendanceData();
+      } else {
+        console.error("fetchAttendanceData is undefined!");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to mark attendance as Absent.");
+    } finally {
+      setAbsentLoading(false);
     }
   };
 
@@ -125,8 +138,19 @@ const TimeIn = ({ employeeId }) => {
         </TouchableOpacity>
       )}
 
-      {/* Time Out Component with latestAttendanceId */}
-      {latestAttendanceId && <TimeOut latestAttendanceId={latestAttendanceId} />}
+      {/* Submit Absent Button */}
+      {selectedStatus === "Absent" && (
+        <TouchableOpacity style={styles.absentButton} onPress={handleMarkAbsent}>
+          {absentLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Submit Absent</Text>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {/* Pass latestAttendanceId to TimeOut component */}
+      {latestAttendanceId && <TimeOut latestAttendanceId={latestAttendanceId}   fetchAttendanceData={fetchAttendanceData}  />}
     </View>
   );
 };
@@ -167,6 +191,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 10,
+  },
+  absentButton: {
+    backgroundColor: "#DC3545",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,

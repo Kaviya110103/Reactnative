@@ -77,7 +77,7 @@ const EmployeeProfile = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.1.13:8080/api/emp/${employeeId}`);
+        const response = await fetch(`http://192.168.1.24:8080/api/emp/${employeeId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch employee details');
         }
@@ -103,6 +103,8 @@ const EmployeeProfile = () => {
     }
   };
 
+
+  
 
   if (loading) {
     return (
@@ -227,7 +229,20 @@ const EmployeeProfile = () => {
                 <Text style={[styles.menuItemText, styles.logoutText]} onPress={() => router.push('/login')} >Logout</Text>
               </TouchableOpacity>
               
-
+              <TouchableOpacity 
+                style={[styles.menuItem, styles.logoutMenuItem]}
+                
+              
+              >
+                <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+                  <TouchableOpacity 
+                    style={[styles.menuItem, styles.logoutMenuItem]} 
+                    onPress={() => router.push('/Camerapg')}
+                  >
+                    <Text style={[styles.menuItemText, styles.logoutText]}>Back to Login</Text>
+                  </TouchableOpacity>
+                <Text style={[styles.menuItemText, styles.logoutText]} onPress={() => router.push('/Camerapg')} >cam</Text>
+              </TouchableOpacity>
               <TouchableOpacity 
             style={styles.attendanceButton}
             onPress={handleMarkAttendance}
@@ -253,7 +268,7 @@ const EmployeeProfile = () => {
           {/* Profile Image Section */}
           <View style={styles.profileImageSection}>
             <Image 
-              source={{ uri: employee.profileImage ?? `http://192.168.1.13:8080/${employee.profileImage}`}}
+              source={{ uri: employee.profileImage ?? `http://192.168.1.24:8080/${employee.profileImage}`}}
               style={styles.profileImage}
             />
             <View style={styles.nameContainer}>

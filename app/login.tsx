@@ -13,7 +13,7 @@ const EmployeeLogin = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.1.13:8080/api/emp/authenticate', {
+      const response = await axios.post('http://192.168.1.24:8080/api/emp/authenticate', {
         username,
         password,
       });

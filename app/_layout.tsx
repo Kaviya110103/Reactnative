@@ -11,6 +11,8 @@ export default function Layout() {
       <Stack.Screen name="EmployeeProfile" options={{ title: 'EmployeeProfile' }} />
       <Stack.Screen name="MarkAttendance" options={{ title: 'Mark Attendance'}} />
       <Stack.Screen name="EmployeeDetailCard" options={{ title: 'EmployeeDetailCard'}} />
+      <Stack.Screen name="Camerapg" options={{ title: 'Camerapg' }} /> 
+      <Stack.Screen name="Image2Capture" options={{ title: 'Image2Capture' }} />
 
 
     </Stack>

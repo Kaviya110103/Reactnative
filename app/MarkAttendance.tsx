@@ -6,6 +6,7 @@ import LiveClock from '@/components/LiveClock';
 import SimpleAttendanceDetails from '@/components/SimpleAttendanceDetails';
 import AttendanceDetailsView from '@/components/AttendanceDetailsView';
 import TimeIn from '@/components/TimeIn';
+// import CameraComponent from '@/components/CameraComponent';
 
 const MarkAttendance = () => {
   const route = useRoute<{ params: { employee: any } }>();
@@ -22,10 +23,11 @@ const MarkAttendance = () => {
             position={employee.position} 
           />
           <LiveClock />
+          {/* <CameraComponent /> */}
+
         </View>
 
        
-
         {/* Attendance Details */}
         {/* <SimpleAttendanceDetails employeeId={employee.id} /> */}
 <AttendanceDetailsView employeeId={employee.id} />

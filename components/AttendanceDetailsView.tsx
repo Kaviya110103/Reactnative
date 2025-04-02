@@ -5,6 +5,7 @@ import TimeIn from '@/components/TimeIn';
 import { Upload } from 'lucide-react';
 import LeavePermissionEmployee from './LeavePermissionEmployee';
 import EmployeeCalendar from './EmployeeCalendar';
+// import CameraComponent from './CameraComponent';
 
 const SimpleAttendanceDetails = ({ employeeId }) => {
   const [attendanceDetails, setAttendanceDetails] = useState(null);
@@ -18,7 +19,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
   // ✅ Define the function
   const fetchAttendanceData = async () => {
     try {
-      const response = await axios.get(`http://192.168.1.13:8080/api/attendance/employee/${employeeId}`);
+      const response = await axios.get(`http://192.168.1.24:8080/api/attendance/employee/${employeeId}`);
       if (response.data?.length) {
         const lastAttendance = response.data[response.data.length - 1];
         setAttendanceDetails(lastAttendance);
@@ -33,7 +34,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
   const fetchImagesByAttendanceId = async (attendanceId) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://192.168.1.13:8080/api/images/displayImagesByAttendanceId/304`);
+      const response = await axios.get(`http://192.168.1.24:8080/api/images/displayImagesByAttendanceId/304`);
       setImageData(response.data);
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -77,7 +78,8 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.statusText}>Attendance Status: {attendanceDetails.attendanceStatus || 'Not Available'}</Text>
+        {/* <CameraComponent /> */}
+        <Text style={styles.statusText}>Attendance Status2: {attendanceDetails.attendanceStatus || 'Not Available'}</Text>
 
         {loading ? (
           <ActivityIndicator size="large" color="#0e7490" style={styles.loader} />
@@ -108,7 +110,11 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
 
       {/* ✅ Pass fetchAttendanceData as a prop */}
       <View style={styles.container}>
-        <TimeIn employeeId={employeeId} fetchAttendanceData={fetchAttendanceData} />
+      <TimeIn 
+  employeeId={employeeId} 
+  fetchAttendanceData={fetchAttendanceData} 
+  latestAttendanceId={latestAttendanceId} 
+/>
       </View>
 
       <View>
