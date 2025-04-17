@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 
-const TimeOut = ({ latestAttendanceId, fetchAttendanceData }) => {
+const TimeOut = ({ latestAttendanceId, fetchAttendanceData ,imageId,employeeId }) => {
   const handleTimeOut = async () => {
     try {
       if (!latestAttendanceId) {
@@ -11,7 +11,7 @@ const TimeOut = ({ latestAttendanceId, fetchAttendanceData }) => {
       }
 
       await axios.post(
-        `http://192.168.1.24:8080/api/attendance/time-out/${latestAttendanceId}`
+        `http://192.168.1.14:8080/api/attendance/time-out/${latestAttendanceId}`
       );
 
       Alert.alert("Success", "Time Out recorded successfully.");

@@ -5,6 +5,11 @@ import TimeIn from '@/components/TimeIn';
 import { Upload } from 'lucide-react';
 import LeavePermissionEmployee from './LeavePermissionEmployee';
 import EmployeeCalendar from './EmployeeCalendar';
+import UploadImageTimein from './UploadImageTimein';
+import { router } from 'expo-router';
+import TimeOut from './TimeOut';
+import UploadImageTimeout from '@/app/UploadImageTimeout';
+import DayCloseModal from './DayCloseModal';
 // import CameraComponent from './CameraComponent';
 
 const SimpleAttendanceDetails = ({ employeeId }) => {
@@ -19,7 +24,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
   // ✅ Define the function
   const fetchAttendanceData = async () => {
     try {
-      const response = await axios.get(`http://192.168.1.24:8080/api/attendance/employee/${employeeId}`);
+      const response = await axios.get(`http://192.168.1.14:8080/api/attendance/employee/${employeeId}`);
       if (response.data?.length) {
         const lastAttendance = response.data[response.data.length - 1];
         setAttendanceDetails(lastAttendance);
@@ -31,10 +36,11 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
     }
   };
 
-  const fetchImagesByAttendanceId = async (attendanceId) => {
+  const fetchImagesByAttendanceId = async (latestAttendanceId) => {
     setLoading(true);
+    
     try {
-      const response = await axios.get(`http://192.168.1.24:8080/api/images/displayImagesByAttendanceId/304`);
+      const response = await axios.get(`http://192.168.1.14:8080/api/images/displayImagesByAttendanceId/${latestAttendanceId}`);
       setImageData(response.data);
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -79,6 +85,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
     <ScrollView style={styles.container}>
       <View style={styles.card}>
         {/* <CameraComponent /> */}
+
         <Text style={styles.statusText}>Attendance Status2: {attendanceDetails.attendanceStatus || 'Not Available'}</Text>
 
         {loading ? (
@@ -91,6 +98,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
               <Text style={styles.timeText}>Time In: {formatTime(attendanceDetails.timeIn)}</Text>
               {imageData.imageUrl1 && (
                 <TouchableOpacity onPress={() => handleImageClick(imageData.imageUrl1)}>
+                  <Text>{imageData.imageId}</Text>
                   <Image source={{ uri: imageData.imageUrl1.replace('localhost', '192.168.1.114') }} style={styles.attendanceImage} />
                 </TouchableOpacity>
               )}
@@ -110,15 +118,82 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
 
       {/* ✅ Pass fetchAttendanceData as a prop */}
       <View style={styles.container}>
-      <TimeIn 
-  employeeId={employeeId} 
-  fetchAttendanceData={fetchAttendanceData} 
-  latestAttendanceId={latestAttendanceId} 
-/>
-      </View>
+
+      <View style={styles.container}>
+  {attendanceDetails.timeIn && imageData?.imageUrl1 && attendanceDetails.timeOut ? (
+    // Show "Hello World" if all conditions are met
+    <TouchableOpacity
+    style={styles.uploadButton}
+    onPress={() =>
+      router.push({
+        pathname: "/Image2Capture",
+        params: {
+          latestAttendanceId: latestAttendanceId,
+          employeeId: employeeId,
+          imageId: imageData.imageId, // Pass imageId
+          timeIn: attendanceDetails.timeIn,
+          timeOut: attendanceDetails.timeOut,
+        },
+      })
+    }
+  >
+    <Text style={styles.uploadbutton}>Upload Time Out Image</Text>
+  </TouchableOpacity>    
+  ) : (
+    // Fallback content if conditions are not met
+    <Text style={styles.statusText}>Required data is missing</Text>
+  )}
+</View>
+
+
+        
+  {attendanceDetails.timeIn && imageData?.imageUrl1 && attendanceDetails.timeOut ? (
+    // Show button to navigate to UploadImageTimeout if all conditions are met
+  <Text style={styles.statusText}>
+    Upload Time Out Image
+  </Text>
+  ) : (
+    // Show TimeIn or TimeOut components based on conditions
+    <>
+      {imageData?.imageUrl1 ? (
+        <TimeOut
+          employeeId={employeeId}
+          latestAttendanceId={latestAttendanceId}
+          fetchAttendanceData={fetchAttendanceData}
+          imageId={imageData.imageId} // Pass imageId to TimeOut component
+        />
+      ) : (
+        <TimeIn
+          employeeId={employeeId}
+          fetchAttendanceData={fetchAttendanceData}
+          latestAttendanceId={latestAttendanceId}
+        />
+      )}
+    </>
+  )}
+</View>
+
+<View style={styles.container}>
+  {attendanceDetails.timeIn && imageData?.imageUrl1 && attendanceDetails.timeOut && imageData?.imageUrl2 ? (
+    // Show "Hello Inba" if all conditions are met
+    <DayCloseModal
+    fetchAttendanceData={fetchAttendanceData}
+
+    latestAttendanceId={latestAttendanceId}
+    employeeId={employeeId}
+    timeIn={attendanceDetails.timeIn}
+    timeOut={attendanceDetails.timeOut}
+    imageUrl1={imageData.imageUrl1}
+    imageUrl2={imageData.imageUrl2}
+  /> ) : (
+    // Fallback content if conditions are not met
+    <Text style={styles.statusText}>Required data is missing</Text>
+  )}
+</View>
 
       <View>
         <LeavePermissionEmployee employeeId={employeeId} />
+      
       </View>
 
 
@@ -161,6 +236,13 @@ const styles = StyleSheet.create({
   modalImage: { width: 200, height: 200, borderRadius: 8, marginBottom: 10 },
   errorText: { fontSize: 16, color: 'red', textAlign: 'center', marginTop: 10 },
   loadingText: { textAlign: 'center', fontSize: 16, color: '#777', marginTop: 20 },
+  uploadButton: {
+    backgroundColor: '#0e7490',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
 });
 
 export default SimpleAttendanceDetails;

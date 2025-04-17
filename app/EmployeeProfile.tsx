@@ -77,7 +77,7 @@ const EmployeeProfile = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.1.24:8080/api/emp/${employeeId}`);
+        const response = await fetch(`http://192.168.1.14:8080/api/emp/${employeeId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch employee details');
         }
@@ -181,6 +181,12 @@ const EmployeeProfile = () => {
         {/* Header with menu */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Employee Profile</Text>
+          <TouchableOpacity 
+            style={styles.attendanceButton}
+            onPress={handleMarkAttendance}
+          >
+            <Text style={styles.attendanceButtonText}>Mark Attendance</Text>
+          </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.menuButton}
@@ -237,7 +243,7 @@ const EmployeeProfile = () => {
                 <Ionicons name="log-out-outline" size={24} color="#ef4444" />
                   <TouchableOpacity 
                     style={[styles.menuItem, styles.logoutMenuItem]} 
-                    onPress={() => router.push('/Camerapg')}
+                    onPress={() => router.push('/Camerapg?full=1')}
                   >
                     <Text style={[styles.menuItemText, styles.logoutText]}>Back to Login</Text>
                   </TouchableOpacity>
@@ -268,7 +274,7 @@ const EmployeeProfile = () => {
           {/* Profile Image Section */}
           <View style={styles.profileImageSection}>
             <Image 
-              source={{ uri: employee.profileImage ?? `http://192.168.1.24:8080/${employee.profileImage}`}}
+              source={{ uri: employee.profileImage ?? `http://192.168.1.14:8080/${employee.profileImage}`}}
               style={styles.profileImage}
             />
             <View style={styles.nameContainer}>

@@ -7,18 +7,22 @@ import {
 import { useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router} from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
-export default function Camerapg() {
+
+export default function UploadImageTimein() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const { latestAttendanceId, employeeId ,fetchAttendanceData } = useLocalSearchParams();
 
-  const employeeId = "12";
-  const attendanceId = "427";
+  // const employeeId = "12";
+  // const attendanceId = "429";
+
   const [facing, setFacing] = useState<CameraType>("back");
 
   if (!permission) {
@@ -58,43 +62,47 @@ export default function Camerapg() {
       setIsCapturing(false);
     }
   };
-
   const handleUploadImage = async () => {
     if (!uri) return;
-    
+  
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('image1', {
-        uri: uri,
-        name: 'captured_image.jpg',
-        type: 'image/jpeg'
-      } as any);
-      formData.append('employeeId', employeeId);
-      formData.append('attendanceId', attendanceId);
-
+      const fetchResponse = await fetch(uri);
+      const blob = await fetchResponse.blob();
+      formData.append('image1', blob, 'captured_image.jpg');
+  
+      formData.append('employeeId', employeeId.toString());
+      formData.append('attendanceId', latestAttendanceId.toString());
+  
       const response = await axios.post(
-        'http://192.168.1.24:8080/api/images/uploadImage1',
+        'http://192.168.1.14:8080/api/images/uploadImage1',
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          transformRequest: () => formData,
         }
       );
-
+  
       console.log('Upload successful:', response.data);
       alert('Image uploaded successfully!');
       setUri(null);
       setShowCamera(false);
+  
+      // Navigate to MarkAttendance screen
+      router.push('/MarkAttendance');
+  
     } catch (error) {
       console.error('Upload error:', error);
       alert(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
     }
+  
+   
   };
+  
 
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"));
@@ -111,6 +119,14 @@ export default function Camerapg() {
             <Ionicons name="camera" size={32} color="#4F46E5" />
             <Text style={styles.captureCardText}>Capture Image</Text>
           </View>
+          <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 16, marginBottom: 10 }}>
+        Latest Attendance ID: {latestAttendanceId}
+      </Text>
+      <Text style={{ fontSize: 16 }}>
+        Employee ID: {employeeId}
+      </Text>
+    </View>
         </TouchableOpacity>
 
 

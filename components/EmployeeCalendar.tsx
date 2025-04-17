@@ -35,7 +35,7 @@ const EmployeeCalendar = ({ employeeId }: { employeeId: number }) => {
 
     axios
       .get(
-        `http://192.168.1.24:8080/api/attendance/employee/${employeeId}?month=${
+        `http://192.168.1.14:8080/api/attendance/employee/${employeeId}?month=${
           month + 1
         }&year=${year}`
       )
@@ -233,14 +233,14 @@ const EmployeeCalendar = ({ employeeId }: { employeeId: number }) => {
                 <View style={styles.imagesContainer}>
                   <Image
                     source={{
-                      uri: `http://192.168.1.24:8080/api/images/displayImage1ByAttendanceId/${selectedAttendance.id}`,
+                      uri: `http://192.168.1.14:8080/api/images/displayImage1ByAttendanceId/${selectedAttendance.id}`,
                     }}
                     style={styles.attendanceImage}
                     resizeMode="cover"
                   />
                   <Image
                     source={{
-                      uri: `http://192.168.1.24:8080/api/images/displayImage2ByAttendanceId/${selectedAttendance.id}`,
+                      uri: `http://192.168.1.14:8080/api/images/displayImage2ByAttendanceId/${selectedAttendance.id}`,
                     }}
                     style={styles.attendanceImage}
                     resizeMode="cover"

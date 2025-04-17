@@ -11,7 +11,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.24:8080/api/attendance/employee/12`);
+        const response = await axios.get(`http://192.168.1.14:8080/api/attendance/employee/12`);
         if (response.data?.length) {
           const lastAttendance = response.data[response.data.length - 1];
           setAttendanceDetails(lastAttendance);
@@ -24,7 +24,7 @@ const SimpleAttendanceDetails = ({ employeeId }) => {
 
     const fetchImagesByAttendanceId = async (attendanceId) => {
       try {
-        const response = await axios.get(`http://192.168.1.24:8080/api/images/displayImagesByAttendanceId/304`);
+        const response = await axios.get(`http://192.168.1.14:8080/api/images/displayImagesByAttendanceId/304`);
         if (response.data) {
           setImages(response.data);
         }

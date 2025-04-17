@@ -9,11 +9,13 @@ import {
   StyleSheet,
 } from "react-native";
 import TimeOut from "./TimeOut";
+import { router } from "expo-router";
 
 const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
   const [selectedStatus, setSelectedStatus] = useState("Present");
   const [loading, setLoading] = useState(false);
   const [absentLoading, setAbsentLoading] = useState(false);
+  const [timeInSuccess, setTimeInSuccess] = useState(false); // Track Time In success
 
   const handleTimeIn = async () => {
     if (!selectedStatus) {
@@ -30,7 +32,7 @@ const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
       };
 
       const response = await fetch(
-        "http://192.168.1.24:8080/api/attendance/time-in",
+        "http://192.168.1.14:8080/api/attendance/time-in",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -51,6 +53,7 @@ const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
         console.error("fetchAttendanceData is undefined!");
       }
 
+      setTimeInSuccess(true); // ✅ Mark Time In as successful
       Alert.alert("Success", "Time In recorded successfully.");
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -63,7 +66,7 @@ const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
     setAbsentLoading(true);
     try {
       const response = await fetch(
-        `http://192.168.1.24:8080/api/attendance/mark-absent?employeeId=${employeeId}`,
+        `http://192.168.1.14:8080/api/attendance/mark-absent?employeeId=${employeeId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -90,67 +93,93 @@ const TimeIn = ({ employeeId, fetchAttendanceData, latestAttendanceId }) => {
 
   return (
     <View style={styles.container}>
-      {/* Radio Buttons */}
-      <View style={styles.radioContainer}>
-        <TouchableOpacity
-          style={[
-            styles.radioButton,
-            selectedStatus === "Present" && styles.selected,
-          ]}
-          onPress={() => setSelectedStatus("Present")}
-        >
-          <Text
-            style={[
-              styles.radioText,
-              selectedStatus === "Present" && styles.selectedText,
-            ]}
-          >
-            Present
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.radioButton,
-            selectedStatus === "Absent" && styles.selected,
-          ]}
-          onPress={() => setSelectedStatus("Absent")}
-        >
-          <Text
-            style={[
-              styles.radioText,
-              selectedStatus === "Absent" && styles.selectedText,
-            ]}
-          >
-            Absent
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Time In Button */}
-      {selectedStatus === "Present" && (
-        <TouchableOpacity style={styles.button} onPress={handleTimeIn}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Time In</Text>
+      {/* Show Radio Buttons and Time In Button only if Time In is not successful */}
+      {!timeInSuccess && (
+        <>
+          {/* Radio Buttons */}
+          <View style={styles.radioContainer}>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                selectedStatus === "Present" && styles.selected,
+              ]}
+              onPress={() => setSelectedStatus("Present")}
+            >
+              <Text
+                style={[
+                  styles.radioText,
+                  selectedStatus === "Present" && styles.selectedText,
+                ]}
+              >
+                Present
+              </Text>
+            </TouchableOpacity>
+  
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                selectedStatus === "Absent" && styles.selected,
+              ]}
+              onPress={() => setSelectedStatus("Absent")}
+            >
+              <Text
+                style={[
+                  styles.radioText,
+                  selectedStatus === "Absent" && styles.selectedText,
+                ]}
+              >
+                Absent
+              </Text>
+            </TouchableOpacity>
+          </View>
+  
+          {/* Time In Button */}
+          {selectedStatus === "Present" && (
+            <TouchableOpacity style={styles.button} onPress={handleTimeIn}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Time In</Text>
+              )}
+            </TouchableOpacity>
           )}
+  
+          {/* Submit Absent Button */}
+          {selectedStatus === "Absent" && (
+            <TouchableOpacity
+              style={styles.absentButton}
+              onPress={handleMarkAbsent}
+            >
+              {absentLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Submit Absent</Text>
+              )}
+            </TouchableOpacity>
+          )}
+        </>
+      )}
+  
+      {/* Show Navigate to Upload Image Button only if Time In is successful */}
+      {timeInSuccess && (
+        <TouchableOpacity
+          style={styles.uploadButton}
+          onPress={() =>
+            router.push({
+              pathname: '/UploadImageTimein',
+              params: {
+                latestAttendanceId: latestAttendanceId,
+                employeeId: employeeId,
+                fetchAttendanceData
+              },
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Upload Time In Image</Text>
         </TouchableOpacity>
       )}
-
-      {/* Submit Absent Button */}
-      {selectedStatus === "Absent" && (
-        <TouchableOpacity style={styles.absentButton} onPress={handleMarkAbsent}>
-          {absentLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Submit Absent</Text>
-          )}
-        </TouchableOpacity>
-      )}
-
-      {/* Pass latestAttendanceId to TimeOut component */}
-      {latestAttendanceId && <TimeOut latestAttendanceId={latestAttendanceId}   fetchAttendanceData={fetchAttendanceData}  />}
+  
+   
     </View>
   );
 };
@@ -198,6 +227,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 5,
     alignItems: "center",
+  },
+  uploadButton: {
+    backgroundColor: "#28A745",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
   },
   buttonText: {
     fontSize: 16,

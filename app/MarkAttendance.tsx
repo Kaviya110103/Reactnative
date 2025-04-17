@@ -6,6 +6,8 @@ import LiveClock from '@/components/LiveClock';
 import SimpleAttendanceDetails from '@/components/SimpleAttendanceDetails';
 import AttendanceDetailsView from '@/components/AttendanceDetailsView';
 import TimeIn from '@/components/TimeIn';
+import UploadImageTimein from '@/components/UploadImageTimein';
+import Camerapg from './';
 // import CameraComponent from '@/components/CameraComponent';
 
 const MarkAttendance = () => {
@@ -24,10 +26,9 @@ const MarkAttendance = () => {
           />
           <LiveClock />
           {/* <CameraComponent /> */}
-
         </View>
 
-       
+       {/* <UploadImageTimein /> */}
         {/* Attendance Details */}
         {/* <SimpleAttendanceDetails employeeId={employee.id} /> */}
 <AttendanceDetailsView employeeId={employee.id} />

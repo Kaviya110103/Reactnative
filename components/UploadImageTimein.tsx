@@ -1,46 +1,39 @@
 import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
-
 import {
   CameraType,
   CameraView,
   useCameraPermissions,
 } from "expo-camera";
 import { useRef, useState } from "react";
-import { Button, Pressable, StyleSheet, Text, View, Image, Modal, TouchableOpacity } from "react-native";
+import { Button, Pressable, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
-export default function Image2Capture() {
-    const { latestAttendanceId, employeeId, imageId, timeIn, timeOut } = useLocalSearchParams();
-  
+export default function Camerapg() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const [facing, setFacing] = useState<CameraType>("back"); // Changed to CameraType
 
+  const employeeId = "12";
+  const attendanceId = "429";
+
+  const [facing, setFacing] = useState<CameraType>("back");
 
   if (!permission) {
-    return <View style={styles.container} />; // Return empty view while waiting for permission
+    return null;
   }
 
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
         <View style={styles.permissionCard}>
-            <View style={styles.detailsContainer}>
-                <Text style={styles.detailsText}>Latest Attendance ID: {latestAttendanceId}</Text>
-                <Text style={styles.detailsText}>Employee ID: {employeeId}</Text>
-                <Text style={styles.detailsText}>Image ID: {imageId}</Text>
-                <Text style={styles.detailsText}>Time In: {timeIn}</Text>
-                <Text style={styles.detailsText}>Time Out: {timeOut}</Text>
-              </View>
           <Ionicons name="camera" size={48} color="#4F46E5" style={styles.icon} />
           <Text style={styles.permissionTitle}>Camera Access Needed</Text>
           <Text style={styles.permissionText}>
-            We need your permission to use the camera for capturing TimeOut image
+            We need your permission to use the camera for capturing images
           </Text>
           <TouchableOpacity 
             style={styles.permissionButton}
@@ -59,7 +52,6 @@ export default function Image2Capture() {
     try {
       const photo = await ref.current.takePictureAsync();
       setUri(photo.uri);
-      setShowCamera(false); // Close camera after taking picture
     } catch (error) {
       console.error("Error taking picture:", error);
       alert("Failed to capture image");
@@ -68,50 +60,41 @@ export default function Image2Capture() {
     }
   };
 
-  const handleUploadImage2 = async () => {
-    if (!uri || !imageId) {
-      alert("Please capture an image first.");
-      return;
-    }
+  const handleUploadImage = async () => {
+    if (!uri) return;
   
     setUploading(true);
     try {
-      // 1. Get the image file
-      const response = await fetch(uri);
-      const blob = await response.blob();
-  
-      // 2. Create FormData
       const formData = new FormData();
-      formData.append('image2', blob, `image2_${Date.now()}.jpg`);
+      const fetchResponse = await fetch(uri);
+      const blob = await fetchResponse.blob();
+      formData.append('image1', blob, 'captured_image.jpg');
   
-      // 3. Verify your endpoint URL
-      const apiUrl = `http://192.168.1.14:8080/api/images/uploadImage2/${imageId}`;
-      console.log('Attempting upload to:', apiUrl);
+      formData.append('employeeId', employeeId.toString());
+      formData.append('attendanceId', attendanceId.toString());
   
-      // 4. Make the request
-      const uploadResponse = await axios.post(apiUrl, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        transformRequest: (data) => data, // Bypass Axios automatic transform
-      });
+      const response = await axios.post(
+        'http://192.168.1.14:8080/api/images/uploadImage1',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
   
-      console.log('Upload success:', uploadResponse.data);
-      alert('Upload successful!');
+      console.log('Upload successful:', response.data);
+      alert('Image uploaded successfully!');
       setUri(null);
+      setShowCamera(false);
     } catch (error) {
-      console.error('Full upload error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        config: error.config
-      });
-      
-      alert(`Upload failed: ${error.message || 'Unknown error'}`);
+      console.error('Upload error:', error);
+      alert(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
     }
   };
+  
 
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"));
@@ -119,16 +102,20 @@ export default function Image2Capture() {
 
   const renderHomeScreen = () => {
     return (
-      <View style={styles.container}>
+      <View style={styles.homeContainer}>
         <TouchableOpacity 
           style={styles.captureCard}
           onPress={() => setShowCamera(true)}
         >
           <View style={styles.captureCardContent}>
             <Ionicons name="camera" size={32} color="#4F46E5" />
-            <Text style={styles.captureCardText}>Capture TimeOut Image</Text>
+            <Text style={styles.captureCardText}>Capture Image</Text>
           </View>
         </TouchableOpacity>
+
+
+        <Text  onPress={() => router.push('/Image2Capture')} >cam</Text>
+
       </View>
     );
   };
@@ -160,10 +147,7 @@ export default function Image2Capture() {
             
             <TouchableOpacity 
               style={styles.closeButton}
-              onPress={() => {
-                setShowCamera(false);
-                setUri(null);
-              }}
+              onPress={() => setShowCamera(false)}
             >
               <Ionicons name="close" size={24} color="white" />
             </TouchableOpacity>
@@ -177,21 +161,17 @@ export default function Image2Capture() {
     return (
       <View style={styles.previewContainer}>
         <View style={styles.previewContent}>
-          <Text style={styles.previewTitle}>TimeOut Image Preview</Text>
+          <Text style={styles.previewTitle}>Preview</Text>
           
           <Image 
             source={{ uri }} 
             style={styles.previewImage}
-            resizeMode="contain"
           />
           
           <View style={styles.previewButtons}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.retakeButton]}
-              onPress={() => {
-                setUri(null);
-                setShowCamera(true);
-              }}
+              onPress={() => setUri(null)}
               disabled={uploading}
             >
               <MaterialIcons name="replay" size={20} color="white" />
@@ -200,7 +180,7 @@ export default function Image2Capture() {
             
             <TouchableOpacity 
               style={[styles.actionButton, styles.uploadButton]}
-              onPress={handleUploadImage2}
+              onPress={handleUploadImage}
               disabled={uploading}
             >
               {uploading ? (
@@ -233,71 +213,69 @@ export default function Image2Capture() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9FAFB',
   },
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   permissionCard: {
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 20,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
     width: '90%',
   },
-  icon: {
-    marginBottom: 15,
-  },
   permissionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '600',
+    marginVertical: 10,
+    color: '#111827',
   },
   permissionText: {
     fontSize: 16,
     textAlign: 'center',
+    color: '#6B7280',
     marginBottom: 20,
-    color: '#666',
   },
   permissionButton: {
     backgroundColor: '#4F46E5',
     paddingVertical: 12,
     paddingHorizontal: 25,
-    borderRadius: 8,
-  },
-  detailsText: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: "#111827",
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
   },
   permissionButtonText: {
     color: 'white',
-    fontSize: 16,
     fontWeight: '600',
+    fontSize: 16,
+  },
+  homeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   captureCard: {
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 30,
+    borderRadius: 16,
+    padding: 25,
+    width: '80%',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   captureCardContent: {
     alignItems: 'center',
@@ -305,12 +283,12 @@ const styles = StyleSheet.create({
   captureCardText: {
     marginTop: 10,
     fontSize: 18,
+    fontWeight: '600',
     color: '#4F46E5',
-    fontWeight: '500',
   },
   cameraContainer: {
     flex: 1,
-    width: '100%',
+    backgroundColor: 'black',
   },
   camera: {
     flex: 1,
@@ -320,29 +298,41 @@ const styles = StyleSheet.create({
     bottom: 40,
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 30,
   },
   flipButton: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    padding: 15,
-    borderRadius: 50,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeButton: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    padding: 15,
-    borderRadius: 50,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   captureButton: {
-    alignItems: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   captureButtonOuter: {
+    position: 'absolute',
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    position: 'absolute',
+    borderWidth: 3,
+    borderColor: 'white',
   },
   captureButtonInner: {
     width: 50,
@@ -354,13 +344,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9FAFB',
+    padding: 20,
   },
   previewContent: {
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '90%',
+    borderRadius: 20,
+    padding: 25,
+    width: '100%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -369,34 +360,36 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   previewTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
     marginBottom: 15,
-    color: '#333',
+    color: '#111827',
   },
   previewImage: {
-    width: '100%',
+    width: 300,
     height: 300,
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: 12,
+    marginVertical: 15,
+    backgroundColor: '#F3F4F6',
   },
   previewButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    marginTop: 20,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 12,
     flex: 1,
     marginHorizontal: 5,
   },
   retakeButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: '#EF4444',
   },
   uploadButton: {
     backgroundColor: '#4F46E5',
@@ -404,6 +397,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     marginLeft: 8,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  icon: {
+    marginBottom: 15,
   },
 });
